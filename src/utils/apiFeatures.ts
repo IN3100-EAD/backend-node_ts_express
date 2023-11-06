@@ -1,3 +1,5 @@
+import qs from "qs";
+
 interface Query {
   find(arg: Record<string, unknown>): Query;
   sort(arg: string): Query;
@@ -6,19 +8,11 @@ interface Query {
   limit(arg: number): Query;
 }
 
-interface QueryString {
-  page?: string;
-  sort?: string;
-  limit?: string;
-  fields?: string;
-  [key: string]: string | undefined;
-}
-
 class APIFeatures {
   query: Query;
-  queryString: QueryString;
+  queryString: qs.ParsedQs;
 
-  constructor(query: Query, queryString: QueryString) {
+  constructor(query: Query, queryString: qs.ParsedQs) {
     this.query = query;
     this.queryString = queryString;
   }
@@ -46,9 +40,12 @@ class APIFeatures {
 
   sort(): APIFeatures {
     if (this.queryString.sort) {
-      const sortBy = this.queryString.sort
-        .split(",")
-        .join(" ");
+      const sortBy = Array.isArray(this.queryString.sort)
+        ? this.queryString.sort.join(" ")
+        : this.queryString.sort
+            .toString()
+            .split(",")
+            .join(" ");
       this.query = this.query.sort(sortBy);
     } else {
       this.query = this.query.sort("-createdAt");
@@ -59,9 +56,12 @@ class APIFeatures {
 
   limitFields(): APIFeatures {
     if (this.queryString.fields) {
-      const fields = this.queryString.fields
-        .split(",")
-        .join(" ");
+      const fields = Array.isArray(this.queryString.fields)
+        ? this.queryString.fields.join(" ")
+        : this.queryString.fields
+            .toString()
+            .split(",")
+            .join(" ");
       this.query = this.query.select(fields);
     } else {
       this.query = this.query.select("-__v");
@@ -72,10 +72,10 @@ class APIFeatures {
 
   paginate(): APIFeatures {
     const page = this.queryString.page
-      ? parseInt(this.queryString.page)
+      ? parseInt(this.queryString.page.toString(), 10)
       : 1;
     const limit = this.queryString.limit
-      ? parseInt(this.queryString.limit)
+      ? parseInt(this.queryString.limit.toString(), 10)
       : 100;
     const skip = (page - 1) * limit;
 
