@@ -14,6 +14,7 @@ import path from "path";
 import morgan from "morgan";
 
 import router from "./router";
+import { AppError, ErrorHandler } from "./utils";
 
 // CONFIG ENV VARIABLES
 dotenv.config({
@@ -79,9 +80,13 @@ app.all(
   "*",
   (req: Request, res: Response, next: NextFunction) => {
     next(
-      new Error(
-        `Can't find ${req.originalUrl} on this server!`
+      new AppError(
+        `Can't find ${req.originalUrl} on this server!`,
+        404
       )
     );
   }
 );
+
+// GLOBAL ERROR HANDLING
+app.use(ErrorHandler.globalErrorController);
