@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+=======
+//category.model.ts
+>>>>>>> Stashed changes
 import mongoose from "mongoose";
 
 interface CategoryAttr {
@@ -15,6 +19,11 @@ const CategorySchema: mongoose.Schema = new mongoose.Schema(
       type: String,
       required: [true, "Category name is required"],
       unique: true,
+<<<<<<< Updated upstream
+=======
+      lowercase: true,
+      trim: true,
+>>>>>>> Stashed changes
     },
     description: {
       type: String,

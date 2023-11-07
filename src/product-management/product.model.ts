@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+=======
+//product.model.ts
+>>>>>>> Stashed changes
 import mongoose from "mongoose";
 
 interface ProductAttr {
@@ -55,6 +59,11 @@ const ProductSchema: mongoose.Schema = new mongoose.Schema(
     discount: {
       type: Number,
       default: 0,
+<<<<<<< Updated upstream
+=======
+      min: 0,
+      max: 100,
+>>>>>>> Stashed changes
     },
     listedBy: {
       type: mongoose.Schema.Types.ObjectId,
