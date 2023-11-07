@@ -3,12 +3,13 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 
 interface Address {
+  [x: string]: any;
   line1: string;
   line2: string;
   city: string;
   state: string;
   postal_code: string;
-  country: "LK";
+  country: string;
 }
 
 interface UserAttr {
@@ -22,7 +23,7 @@ interface UserAttr {
     | "inventoryManager"
     | "deliveryPerson"
     | "superAdmin";
-  address?: Address[];
+  address: Address[];
   stripeCustomerId?: string;
 }
 
