@@ -73,7 +73,7 @@ mongoose.connection.on("error", (err: mongoose.Error) => {
 });
 
 // ROUTE HANDLING
-app.use("/", router());
+app.use("/api/v1/", router());
 
 // ? - HANDLE UNHANDLED ROUTES
 app.all(
