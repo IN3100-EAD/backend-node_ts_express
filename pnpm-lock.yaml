@@ -38,6 +38,9 @@ dependencies:
   morgan:
     specifier: ^1.10.0
     version: 1.10.0
+  qs:
+    specifier: ^6.11.2
+    version: 6.11.2
   stripe:
     specifier: ^14.3.0
     version: 14.3.0
@@ -64,6 +67,9 @@ devDependencies:
   '@types/jsonwebtoken':
     specifier: ^9.0.4
     version: 9.0.4
+  '@types/qs':
+    specifier: ^6.9.9
+    version: 6.9.9
   '@types/validator':
     specifier: ^13.11.5
     version: 13.11.5
