@@ -1,3 +1,4 @@
+//index.ts
 import { Request } from "express";
 import { UserDoc } from "../user-management/user.model";
 
