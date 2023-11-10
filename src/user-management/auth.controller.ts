@@ -1,10 +1,12 @@
 //auth.controller.ts
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import Stripe from "stripe";
 
 import UserModel, { UserAttr, UserDoc } from "./user.model";
 import { catchAsync, AppError } from "../utils";
 import { RequestWithUser } from "../types";
+import { stripeHandler } from "../index";
 
 const createSendJWTToken = (
   user: UserDoc,
@@ -59,6 +61,19 @@ const createSendJWTToken = (
   });
 };
 
+interface RegisterRequestBody {
+  email: string;
+  name: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+  role?:
+    | "customer"
+    | "inventoryManager"
+    | "deliveryPerson"
+    | "superAdmin";
+}
+
 // REGISTER USER : CUSTOMER
 const register = catchAsync(
   async (
@@ -73,7 +88,26 @@ const register = catchAsync(
       confirmPassword,
       phoneNumber,
       role,
-    } = req.body;
+    } = req.body as RegisterRequestBody;
+
+    let stripeCustomer: Stripe.Customer;
+
+    try {
+      stripeCustomer = await stripeHandler.createCustomer(
+        email,
+        phoneNumber,
+        name
+      );
+    } catch (error) {
+      console.log(error);
+
+      return next(
+        new AppError(
+          "Error creating Stripe Customer. Rolling back",
+          500
+        )
+      );
+    }
 
     const newCustomer = await UserModel.create({
       email,
@@ -82,6 +116,7 @@ const register = catchAsync(
       confirmPassword,
       phoneNumber,
       role,
+      stripeCustomerId: stripeCustomer.id,
     });
 
     createSendJWTToken(newCustomer, 201, res, next);

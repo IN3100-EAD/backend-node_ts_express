@@ -5,6 +5,7 @@ import ProductModel from "./product.model";
 import { AppError, catchAsync } from "../utils";
 import { RequestWithUser } from "../types";
 import CategoryModel from "./category.model";
+import { stripeHandler } from "../index";
 
 interface createProductItemRequestBody {
   category: string;
@@ -67,6 +68,14 @@ const createProductItem = catchAsync(
       category: categoryDoc._id,
       listedBy: req.user._id,
     });
+
+    await stripeHandler.createProduct(
+      productDoc._id,
+      productDoc.name,
+      productDoc.description,
+      productDoc.price,
+      productDoc.mainImage
+    );
 
     res.status(201).json({
       status: "success",
@@ -200,6 +209,11 @@ const updatePrice = catchAsync(
 
     if (!productDoc)
       return next(new AppError("Product not found", 404));
+
+    await stripeHandler.updateProductPrice(
+      productDoc._id,
+      productDoc.price
+    );
 
     res.status(200).json({
       status: "success",

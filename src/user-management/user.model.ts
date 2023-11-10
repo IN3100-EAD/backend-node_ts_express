@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 interface Address {
   [x: string]: any;
   line1: string;
-  line2: string;
+  line2?: string;
   city: string;
   state: string;
   postal_code: string;
@@ -18,14 +18,14 @@ interface UserAttr {
   email: string;
   password: string;
   confirmPassword?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   role:
     | "customer"
     | "inventoryManager"
     | "deliveryPerson"
     | "superAdmin";
   address: Address[];
-  stripeCustomerId?: string;
+  stripeCustomerId: string;
 }
 
 interface UserDoc extends mongoose.Document, UserAttr {
@@ -87,6 +87,7 @@ const UserSchema: mongoose.Schema = new mongoose.Schema(
         validator.isMobilePhone,
         "Please provide a valid phone number",
       ],
+      required: [true, "Please provide a phone number"],
     },
     role: {
       type: String,
