@@ -10,6 +10,7 @@ import {
   apiFeatures,
 } from "../utils";
 import { RequestWithUser } from "../types";
+import { stripeHandler } from "../index";
 
 const getAllUsers = catchAsync(
   async (
@@ -35,6 +36,16 @@ const getAllUsers = catchAsync(
   }
 );
 
+interface AddressRequestBody {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  province: string;
+  postal_code: string;
+  country: string;
+}
+
 const addAddress = catchAsync(
   async (
     req: RequestWithUser,
@@ -51,19 +62,17 @@ const addAddress = catchAsync(
       line2,
       city,
       state,
-      province,
       postal_code,
       country,
-    } = req.body;
+    } = req.body as AddressRequestBody;
 
     const address = {
       line1,
       line2,
       city,
       state,
-      province,
       postal_code,
-      country: country,
+      country,
     };
 
     const user = await UserModel.findById(req.user._id);
@@ -77,9 +86,15 @@ const addAddress = catchAsync(
       validateBeforeSave: false,
     });
 
+    await stripeHandler.addAdressToCustomer(
+      user.stripeCustomerId,
+      user.name,
+      user.phoneNumber,
+      address
+    );
+
     res.status(200).json({
       status: "success",
-      data: user,
     });
   }
 );
