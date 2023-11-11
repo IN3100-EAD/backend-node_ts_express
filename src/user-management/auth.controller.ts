@@ -119,6 +119,19 @@ const register = catchAsync(
       stripeCustomerId: stripeCustomer.id,
     });
 
+    // UPDATE META DATA
+    try {
+      await stripeHandler.updateCustomerMetaData(
+        newCustomer.stripeCustomerId,
+        "userId",
+        newCustomer._id
+      );
+    } catch (error) {
+      return next(
+        new AppError("Error updating metadata", 500)
+      );
+    }
+
     createSendJWTToken(newCustomer, 201, res, next);
   }
 );
