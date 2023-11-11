@@ -1,8 +1,15 @@
 import express from "express";
 
 import { protectedRoute } from "../user-management/auth.controller";
-import { createCheckoutSession } from "./checkout.controller";
+import {
+  createCheckoutSession,
+  stripeWebhook,
+} from "./checkout.controller";
 
 export default (router: express.Router) => {
-  router.post("/checkout", protectedRoute, createCheckoutSession);
+  router.post(
+    "/stripe/checkout",
+    protectedRoute,
+    createCheckoutSession
+  );
 };

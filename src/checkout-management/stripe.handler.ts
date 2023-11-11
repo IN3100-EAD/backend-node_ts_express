@@ -1,6 +1,7 @@
 // STRIPE INSTANCE USING CLASS : OOP Approach
 
 import Stripe from "stripe";
+import { RequestWithUser } from "../types";
 
 interface Address {
   line1: string;
@@ -69,63 +70,70 @@ class StripeHandler {
 
   async createCheckoutSession(
     customer: string,
-    lineItems: Stripe.Checkout.SessionCreateParams.LineItem[]
+    lineItems: Stripe.Checkout.SessionCreateParams.LineItem[],
+    cartItems: string,
+    customerIdMongo: string
   ) {
-    const session = await this.stripe.checkout.sessions.create({
-      customer,
-      payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      shipping_address_collection: {
-        allowed_countries: ["LK"],
-      },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: {
-              amount: 0,
-              currency: "lkr",
-            },
-            display_name: "Free shipping",
-            // Delivers between 5-7 business days
-            delivery_estimate: {
-              minimum: {
-                unit: "business_day",
-                value: 3,
+    const session =
+      await this.stripe.checkout.sessions.create({
+        customer,
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        metadata: {
+          cart: cartItems,
+          userId: customerIdMongo,
+        },
+        mode: "payment",
+        shipping_address_collection: {
+          allowed_countries: ["LK"],
+        },
+        shipping_options: [
+          {
+            shipping_rate_data: {
+              type: "fixed_amount",
+              fixed_amount: {
+                amount: 0,
+                currency: "lkr",
               },
-              maximum: {
-                unit: "business_day",
-                value: 5,
+              display_name: "Free shipping",
+              // Delivers between 5-7 business days
+              delivery_estimate: {
+                minimum: {
+                  unit: "business_day",
+                  value: 3,
+                },
+                maximum: {
+                  unit: "business_day",
+                  value: 5,
+                },
               },
             },
           },
-        },
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: {
-              amount: 25000,
-              currency: "lkr",
-            },
-            display_name: "Next day air",
-            // Delivers in exactly 1 business day
-            delivery_estimate: {
-              minimum: {
-                unit: "business_day",
-                value: 1,
+          {
+            shipping_rate_data: {
+              type: "fixed_amount",
+              fixed_amount: {
+                amount: 25000,
+                currency: "lkr",
               },
-              maximum: {
-                unit: "business_day",
-                value: 1,
+              display_name: "Next day air",
+              // Delivers in exactly 1 business day
+              delivery_estimate: {
+                minimum: {
+                  unit: "business_day",
+                  value: 1,
+                },
+                maximum: {
+                  unit: "business_day",
+                  value: 1,
+                },
               },
             },
           },
-        },
-      ],
-      success_url: `${process.env.CLIENT_URL}/success`,
-      cancel_url: `${process.env.CLIENT_URL}/cart`,
-    });
+        ],
+        success_url: `${process.env.CLIENT_URL}/success`,
+        cancel_url: `${process.env.CLIENT_URL}/cart`,
+      });
 
     return session;
   }
@@ -146,7 +154,11 @@ class StripeHandler {
     };
   }
 
-  async createCustomer(email: string, phoneNumber: string, name: string) {
+  async createCustomer(
+    email: string,
+    phoneNumber: string,
+    name: string
+  ) {
     const customer = await this.stripe.customers.create({
       email,
       phone: phoneNumber,
@@ -174,6 +186,32 @@ class StripeHandler {
         },
         name: custName,
         phone: phoneNumber,
+      },
+    });
+  }
+
+  async validateWebhook(
+    endpointSecret: string,
+    sig: string | string[] | Buffer,
+    req: RequestWithUser
+  ) {
+    const event = this.stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      endpointSecret
+    );
+
+    return event;
+  }
+
+  async updateCustomerMetaData(
+    id: string,
+    key: string,
+    value: string
+  ) {
+    await this.stripe.customers.update(id, {
+      metadata: {
+        [key]: value,
       },
     });
   }
