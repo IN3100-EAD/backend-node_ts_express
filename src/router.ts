@@ -5,6 +5,7 @@ import productRouter from "./product-management/product.router";
 import cartRouter from "./cart-management/cart.router";
 import checkoutRouter from "./checkout-management/checkout.router";
 import orderRouter from "./order-management/order.router";
+import deliveryRouter from "./delivery-management/delivery.router";
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ export default (): express.Router => {
   cartRouter(router);
   checkoutRouter(router);
   orderRouter(router);
+  deliveryRouter(router);
   return router;
 };
