@@ -143,4 +143,4 @@ const UserModel = mongoose.model<UserDoc>(
 
 export default UserModel;
 
-export { UserDoc, UserAttr };
+export { UserDoc, UserAttr, AddressSchema, Address };

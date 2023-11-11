@@ -16,6 +16,7 @@ import morgan from "morgan";
 import router from "./router";
 import { AppError, ErrorHandler } from "./utils";
 import StripeHandler from "./checkout-management/stripe.handler";
+import { stripeWebhook } from "./checkout-management/checkout.controller";
 
 // CONFIG ENV VARIABLES
 dotenv.config({
@@ -34,7 +35,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // CONFIG BODY PARSER
-app.use(bodyParser.json());
+app.use("/api", bodyParser.json());
 
 // CONFIG COOKIE PARSER
 app.use(cookieParser());
@@ -84,6 +85,11 @@ export const stripeHandler = new StripeHandler();
 
 // ROUTE HANDLING
 app.use("/api/v1", router());
+app.use(
+  "/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 
 // HANDLE UNHANDLED ROUTES
 app.all(
